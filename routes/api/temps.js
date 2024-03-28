@@ -1,12 +1,11 @@
 const express = require("express");
+const { upload } = require("../../middlewares");
 
 const router = express.Router();
+const writeMap  = require("../../models/index");
 
-router.get("/", async (reg, res, next) => {
-    res.json(
-      {message: "I'm ok!",}
-    );
-});
+// transport temp-s zip file from front-end
+router.post("/", upload.single("file"), writeMap);
 
 // export to server
 module.exports = router;
