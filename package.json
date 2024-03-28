@@ -15,9 +15,11 @@
     "pnpm": "^8.15.5"
   },
   "dependencies": {
+    "canvas": "^2.11.2",
     "cors": "^2.8.5",
     "decompress": "^4.2.1",
     "express": "^4.19.2",
+    "jsdom": "^24.0.0",
     "multer": "^1.4.5-lts.1"
   }
 }
