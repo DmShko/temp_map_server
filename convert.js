@@ -24,13 +24,14 @@ let sourceimage = dom.window.document.querySelector("img");
 const newCanvas =  new Canvas(sourceimage.width, sourceimage.height);
 let context = newCanvas.getContext("2d");
 
+// temps table array (size of 6480000 (3600px * 1800px))
 let temps = [];
-let tempsArr = [];
-let tempsArrTwo = [];
 
 const getColor = (value) => {
-  
+  // to Celsius
   let toC = 5/9 *(value - 32)
+
+  // return water temp color
   if(toC <= 10) return [60, 106, 255, 255];
   if(toC <= 20) return [60, 255, 247, 255];
   if(toC <= 30) return [91, 255, 60, 255];
@@ -40,6 +41,8 @@ const getColor = (value) => {
 
 function createMap () {
 
+  /**########  Canvas ######### */
+  //create canvas and add image content
   newCanvas.height = sourceimage.height;
   newCanvas.width = sourceimage.width;
 
@@ -52,35 +55,28 @@ function createMap () {
   let all = pixels.data.length;
   let data = pixels.data;
   let j = 0;
-  // let twoData = _.chunk(data, 4);
- 
+  /**########  Canvas ######### */
 
+  /**########  Select pixel and chenge color ######### */
   for (let i = 0; i < all; i += 4) {
     j += 1;
     if(data[i + 1] === 60) {
-
+    
         let tempsColor = getColor(temps[j]);
-  
-        // let stash = data[i];
-        // data[i] = data[i + 1];
-        // data[i + 1] = stash;
-        // data[i + 1] = 255;
+
         if(tempsColor !== undefined) {
           data[i] = tempsColor[0]
           data[i + 1] = tempsColor[1]
           data[i + 2] = tempsColor[2]
         }
         
-        // twoData[i] = getColor(temps[i]);
-        // console.log(temps[i]);
     }
   }
-
+  /**########  Select pixel and chenge color ######### */
 
   context.putImageData(pixels, 0, 0);
 
-  console.log(data, all);
-
+  /**########  Write new image to file ######### */
   const out = fs.createWriteStream('./public/map/temp_map.jpg');
   const stream = newCanvas.createJPEGStream();
   stream.pipe(out);
@@ -89,28 +85,26 @@ function createMap () {
 
 function getTempertures () {
   
-  let readStream = fs.createReadStream('./public/map/sst.grid', { 
-  highWaterMark: 6480000 });
+  /**########  Read chunks size of 6480000 from sst.grid and save chunk #45  ######### */
+  let readStream = fs.createReadStream('./dist/sst.grid', { 
+  highWaterMark: 6480000});
+
   let i=0;
   readStream.on('data', function(chunk) {
+
     i += 1;
-    if(i === 90) temps = [...chunk];
+    if(i === 45) temps = [...chunk];
   
   });
- 
+  
   readStream.on('end', () => {
-      console.log('chunk Data : ')
-      // tempsArr = _.chunk(temps, 3600);
-      // for(let y = 0; y < 1800; y += 1) {
-      //   tempsArrTwo.push(tempsArr[y]);
-      // }
-      console.log(temps, temps.length);
-      
+     
       console.log('file has been read completely');
+
+      // create temps map function
       createMap();
   });
   
- 
 };
 
 function convertMap () {

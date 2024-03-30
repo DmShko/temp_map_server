@@ -12,6 +12,7 @@ temp_map.use((req, res) => {
     res.status(404).json({ message: "Not found" });
 });
   
+// universal error hundler
 temp_map.use((err, req, res, next) => {
   
   const { status = 500, message= "Server error" } = err;
