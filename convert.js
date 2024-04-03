@@ -23,20 +23,21 @@ const dom = new JSDOM(`<!doctype html>
 let sourceimage = dom.window.document.querySelector("img");
 const newCanvas = new Canvas(sourceimage.width, sourceimage.height);
 let context = newCanvas.getContext("2d");
-
+let chunkArr = [];
 // temps table array (size of 6480000 (3600px * 1800px))
 let temps = [];
 
 const getColor = (value) => {
+
   // to Celsius
   let toC = (5 / 9) * (value - 32);
 
   // return water temp color
   if (toC <= 10) return [60, 106, 255, 255];
-  if (toC <= 20) return [60, 255, 247, 255];
-  if (toC <= 30) return [91, 255, 60, 255];
-  if (toC <= 35) return [248, 180, 13, 255];
-  if (toC > 35) return [248, 25, 13, 255];
+  if (toC > 10 && toC <= 20) return [60, 255, 247, 255];
+  if (toC > 20 && toC <= 30) return [91, 255, 60, 255];
+  if (toC > 30 && toC <= 35) return [248, 180, 13, 255];
+  
 };
 
 function createMap() {
@@ -58,7 +59,7 @@ function createMap() {
   let j = 0;
   /**########  Canvas ######### */
 
-  /**########  Select pixel and chenge color ######### */
+  /**########  Select pixel and change color ######### */
   for (let i = 0; i < all; i += 4) {
     j += 1;
     if (data[i + 1] === 60) {
@@ -71,7 +72,7 @@ function createMap() {
       }
     }
   }
-  /**########  Select pixel and chenge color ######### */
+  /**########  Select pixel and change color ######### */
 
   context.putImageData(pixels, 0, 0);
 
@@ -84,19 +85,31 @@ function createMap() {
 
 function getTempertures() {
   /**########  Read chunks size of 6480000 from sst.grid and save chunk #45  ######### */
+ 
   let readStream = fs.createReadStream("./dist/sst.grid", {
-    highWaterMark: 6480000,
+    highWaterMark: 36000,
   });
 
   let i = 0;
   readStream.on("data", function (chunk) {
+
+    chunkArr = [];
     i += 1;
-    if (i === 45) temps = [...chunk];
+    // get chunk of 36000 elements (width of one row data from binary file)
+    if(i % 10 === 0) {
+      chunkArr = [...chunk];
+
+       // take such 10-d chunk and take such 10 element in it
+      for(let c = 0; c < chunkArr.length; c += 10) {
+        temps.push(chunkArr[c]);
+      }
+    }
+
   });
 
   readStream.on("end", () => {
     console.log("file has been read completely");
-
+   
     // create temps map function
     createMap();
   });
