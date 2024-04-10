@@ -33,10 +33,17 @@ const getColor = (value) => {
   let toC = (5 / 9) * (value - 32);
 
   // return water temp color
-  if (toC <= 10) return [60, 106, 255, 255];
-  if (toC > 10 && toC <= 20) return [60, 255, 247, 255];
-  if (toC > 20 && toC <= 30) return [91, 255, 60, 255];
-  if (toC > 30 && toC <= 35) return [248, 180, 13, 255];
+  if (toC <= 5) return [6, 1, 101, 255];
+  if (toC > 5 && toC <= 10) return [19, 139, 202, 255];
+
+  if (toC > 10 && toC <= 15) return [60, 255, 500, 255];
+  if (toC > 15 && toC <= 20) return [60, 255, 247, 255];
+
+  if (toC > 20 && toC <= 25) return [91, 255, 130, 255];
+  if (toC > 25 && toC <= 30) return [91, 255, 60, 255];
+
+  if (toC > 30 && toC <= 32) return [248, 180, 13, 255];
+  if (toC > 32 && toC <= 35) return [242, 38, 33, 255];
   
 };
 
@@ -57,13 +64,15 @@ function createMap() {
   let all = pixels.data.length;
   let data = pixels.data;
   let j = 0;
+  const tempsReverce = temps.reverse();
+
   /**########  Canvas ######### */
 
   /**########  Select pixel and change color ######### */
   for (let i = 0; i < all; i += 4) {
     j += 1;
     if (data[i + 1] === 60) {
-      let tempsColor = getColor(temps[j]);
+      let tempsColor = getColor(tempsReverce[j]);
 
       if (tempsColor !== undefined) {
         data[i] = tempsColor[0];
@@ -96,10 +105,11 @@ function getTempertures() {
     chunkArr = [];
     i += 1;
     // get chunk of 36000 elements (width of one row data from binary file)
+    // take such 10-d chunk
     if(i % 10 === 0) {
-      chunkArr = [...chunk];
+      chunkArr = [...chunk.reverse()];
 
-       // take such 10-d chunk and take such 10 element in it
+       // take such 10 element
       for(let c = 0; c < chunkArr.length; c += 10) {
         temps.push(chunkArr[c]);
       }
